@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Dream Blueprint Maker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+    
+    <div class="container">
+        <h1 class="main-title">Travel Dream Blueprint Maker</h1>
+        
+        <div class="travel-form">
+            <div class="form-group">
+                <label for="destination">Destination</label>
+                <select id="destination" required>
+                    <option value="">Select Destination</option>
+                    <option value="andhra pradesh">Andhra Pradesh</option>
+                    <option value="arunachal pradesh">Arunachal Pradesh</option>
+                    <option value="assam">Assam</option>
+                    <option value="bihar">Bihar</option>
+                    <option value="chhattisgarh">Chhattisgarh</option>
+                    <option value="goa">Goa</option>
+                    <option value="gujarat">Gujarat</option>
+                    <option value="himachal pradesh">Himachal Pradesh</option>
+                    <option value="karnataka">Karnataka</option>
+                    <option value="kerala">Kerala</option>
+                    <option value="maharashtra">Maharashtra</option>
+                    <option value="rajasthan">Rajasthan</option>
+                    <option value="tamil nadu">Tamil Nadu</option>
+                    <option value="telangana">Telangana</option>
+                    <option value="delhi">Delhi</option>
+                </select>
+            </div>
+
+            <div id="destinationCarousel" class="destination-carousel" style="display: none;">
+                <div class="carousel-container">
+                    <div class="carousel-slides"></div>
+                    <div class="carousel-controls">
+                        <button class="carousel-control prev"><i class="fas fa-chevron-left"></i></button>
+                        <div class="carousel-indicators"></div>
+                        <button class="carousel-control next"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="start-date">Start Date</label>
+                <input type="date" id="start-date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="end-date">End Date</label>
+                <input type="date" id="end-date" required>
+            </div>
+            
+            <div id="tripDuration" class="trip-duration" style="display: none;">
+                <i class="fas fa-clock"></i> Trip Duration: <span id="durationDays">0</span> days
+            </div>
+
+            <div class="form-group">
+                <label for="travelers">Travelers</label>
+                <input type="text" id="members" placeholder="Enter names separated by commas">
+                <div id="membersTags" class="members-tags"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="budget">Budget (₹)</label>
+                <input type="range" id="budget" min="10000" max="500000" value="50000" step="5000">
+                <div class="budget-display">
+                    <span id="budgetValue">₹50,000</span>
+                    <div id="budgetPerPerson" style="display: none;">
+                        <i class="fas fa-user"></i> Per Person: <span id="perPersonValue">₹50,000</span>
+                    </div>
+                </div>
+            </div>
+
+            <button id="generate-blueprint" class="generate-btn">Generate Blueprint</button>
+        </div>
+
+        <div id="loadingOverlay" class="loading-overlay hidden">
+            <div class="loader"></div>
+            <p>Creating your dream travel plan...</p>
+        </div>
+
+        <div id="itineraryResult" class="itinerary-result hidden">
+            <div class="result-header">
+                <h2>Your Travel Blueprint for <span id="destinationTitle"></span></h2>
+                <p class="result-subtitle">Here's your customized travel plan</p>
+            </div>
+            
+            <div class="result-tabs">
+                <div class="tab-headers">
+                    <div class="tab-header active" data-tab="summary">
+                        <i class="fas fa-list"></i> Summary
+                    </div>
+                    <div class="tab-header" data-tab="itinerary">
+                        <i class="fas fa-map-marked-alt"></i> Itinerary
+                    </div>
+                    <div class="tab-header" data-tab="budget">
+                        <i class="fas fa-coins"></i> Budget
+                    </div>
+                    <div class="tab-header" data-tab="tasks">
+                        <i class="fas fa-tasks"></i> Tasks
+                    </div>
+                </div>
+                
+                <div class="tab-content">
+                    <div id="summaryTab" class="tab-pane active">
+                        <div id="tripSummary" class="trip-summary-placeholder">
+                            <div class="placeholder-item"></div>
+                            <div class="placeholder-item"></div>
+                            <div class="placeholder-item"></div>
+                        </div>
+                        <div id="tripSummaryContent" class="trip-summary-content hidden"></div>
+                    </div>
+                    
+                    <div id="itineraryTab" class="tab-pane">
+                        <div id="itineraryTimeline" class="itinerary-timeline"></div>
+                    </div>
+                    
+                    <div id="budgetTab" class="tab-pane">
+                        <div class="budget-overview">
+                            <div class="budget-total">
+                                <h3>Total Budget</h3>
+                                <div class="budget-amount" id="totalBudgetDisplay">₹0</div>
+                            </div>
+                            <div class="budget-per-person">
+                                <h3>Per Person</h3>
+                                <div class="budget-amount" id="perPersonBudgetDisplay">₹0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="budget-chart-container">
+                            <canvas id="budgetChart"></canvas>
+                        </div>
+                        
+                        <div class="budget-allocation">
+                            <h3>Budget Allocation</h3>
+                            <div class="allocation-sliders"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="tasksTab" class="tab-pane">
+                        <div class="task-progress">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="taskProgressBar"></div>
+                            </div>
+                            <div class="progress-text" id="taskProgressCount">0/0 completed</div>
+                        </div>
+                        
+                        <div id="tasksList" class="tasks-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
